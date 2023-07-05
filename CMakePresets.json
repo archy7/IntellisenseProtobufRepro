@@ -1,101 +1,121 @@
 ﻿{
-    "version": 3,
-    "configurePresets": [
-        {
-            "name": "windows-base",
-            "hidden": true,
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "installDir": "${sourceDir}/out/install/${presetName}",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            }
+  "version": 2,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 20,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "displayName": "Basic Ninja Config",
+      "description": "Common demoninator for all builds",
+      "generator": "Ninja",
+      "hidden": true
+    },
+    {
+      "name": "linux-base",
+      "inherits": "base",
+      "description": "Common denominator for all linux builds",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/deliver",
+        "BUILD_DOCS": "OFF"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [
+            "Linux"
+          ]
         },
-        {
-            "name": "x64-debug",
-            "displayName": "x64 Debug",
-            "inherits": "windows-base",
-            "architecture": {
-                "value": "x64",
-                "strategy": "external"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "x64-release",
-            "displayName": "x64 Release",
-            "inherits": "x64-debug",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "x86-debug",
-            "displayName": "x86 Debug",
-            "inherits": "windows-base",
-            "architecture": {
-                "value": "x86",
-                "strategy": "external"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "x86-release",
-            "displayName": "x86 Release",
-            "inherits": "x86-debug",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        },
-        {
-            "name": "linux-debug",
-            "displayName": "Linux Debug",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "installDir": "${sourceDir}/out/install/${presetName}",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            },
-            "vendor": {
-                "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
-                    "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
-                }
-            }
-        },
-        {
-            "name": "macos-debug",
-            "displayName": "macOS Debug",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "installDir": "${sourceDir}/out/install/${presetName}",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Darwin"
-            },
-            "vendor": {
-                "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
-                    "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
-                }
-            }
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
+          "copyBuildOutput": true,
+          "rsyncCommandArgs": [
+            "--exclude=.venv",
+            "--exclude=*.pb.*",
+            "--exclude=cpp.hint"
+          ]
         }
-    ]
+      }
+    },
+    {
+      "name": "linux-gcc",
+      "inherits": "linux-base",
+      "description": "Common denominator for all GCC builds",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_NAMES": "gcc-13;gcc",
+        "CMAKE_CXX_COMPILER_NAMES": "g++-13;g++"
+      }
+    },
+    {
+      "name": "linux-clang",
+      "inherits": "linux-base",
+      "description": "Common denominator for all Clang builds",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_NAMES": "clang-16;clang",
+        "CMAKE_CXX_COMPILER_NAMES": "clang++-16;clang++"
+      }
+    },
+    {
+      "name": "gcc-debug",
+      "inherits": "linux-gcc",
+      "displayName": "Linux GCC Debug",
+      "binaryDir": "${sourceDir}/build/gcc/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "gcc-release",
+      "inherits": "linux-gcc",
+      "displayName": "Linux GCC Release",
+      "binaryDir": "${sourceDir}/build/gcc/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "clang-debug",
+      "inherits": "linux-clang",
+      "displayName": "Linux Clang Debug",
+      "binaryDir": "${sourceDir}/build/clang/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "clang-release",
+      "inherits": "linux-clang",
+      "displayName": "Linux Clang Release",
+      "binaryDir": "${sourceDir}/build/clang/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "gcc-debug",
+      "configurePreset": "gcc-debug",
+      "displayName": "Executable"
+    },
+    {
+      "name": "gcc-release",
+      "configurePreset": "gcc-release",
+      "displayName": "Executable"
+    },
+    {
+      "name": "clang-debug",
+      "configurePreset": "clang-debug",
+      "displayName": "Executable"
+    },
+    {
+      "name": "clang-release",
+      "configurePreset": "clang-release",
+      "displayName": "Executable"
+    }
+  ]
 }
